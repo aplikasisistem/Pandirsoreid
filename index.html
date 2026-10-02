@@ -34,11 +34,33 @@
           navigator.serviceWorker
             .register('/sw.js')
             .then((registration) => {
-              console.log('PWA Service Worker registered with scope:', registration.scope);
+              // Immediately check for updates on page load
+              registration.update();
+
+              // When a new version is detected, tell the worker to activate immediately
+              registration.addEventListener('updatefound', () => {
+                const installingWorker = registration.installing;
+                if (installingWorker) {
+                  installingWorker.addEventListener('statechange', () => {
+                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      installingWorker.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                  });
+                }
+              });
             })
             .catch((error) => {
               console.warn('PWA Service Worker registration failed:', error);
             });
+
+          // Smoothly reload the page when the new Service Worker activates
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+              refreshing = true;
+              window.location.reload();
+            }
+          });
         });
       }
     </script>

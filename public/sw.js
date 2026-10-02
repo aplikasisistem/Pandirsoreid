@@ -1,5 +1,5 @@
 // PANDIRSTORE.ID - Service Worker (PWA)
-const CACHE_NAME = 'pandirstore-pwa-v1';
+const CACHE_NAME = 'pandirstore-pwa-v2';
 
 // Core static assets to precache on install
 const PRECACHE_ASSETS = [
@@ -25,13 +25,14 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate Event: Clear outdated caches and claim clients
+// Activate Event: Clear all outdated caches and claim clients immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((name) => {
           if (name !== CACHE_NAME) {
+            console.log('Clearing old PWA cache:', name);
             return caches.delete(name);
           }
         })
@@ -42,19 +43,26 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event: Network-first for navigation, Cache-first with network fallback for assets
+// Listen for message from clients to force skipWaiting
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Fetch Event: Network-first for HTML navigation, Stale-while-revalidate for assets
 self.addEventListener('fetch', (event) => {
-  // Only handle HTTP/HTTPS GET requests
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
   // Ignore cross-origin non-http schemes (e.g. chrome-extension://)
   if (!url.protocol.startsWith('http')) return;
 
-  // Handle SPA Navigation requests: Network-first with fallback to cached index.html
+  // Handle SPA Navigation requests: ALWAYS Network-first with no-cache header
+  // This ensures new deployments on Netlify are instantly served to visitors
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: 'no-cache' })
         .then((response) => {
           if (response && response.status === 200) {
             const clone = response.clone();
@@ -69,27 +77,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle static assets (CSS, JS, Fonts, Images): Cache-first with network fallback
+  // Handle static assets (CSS, JS, Fonts, Images)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Fetch in background to update cache (stale-while-revalidate)
-        fetch(event.request)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, networkResponse);
-              });
-            }
-          })
-          .catch(() => {
-            // Ignore background fetch failure in offline mode
-          });
-        return cachedResponse;
-      }
-
-      // Not in cache, fetch from network and cache
-      return fetch(event.request)
+      // If found in cache, return cached response while updating in background
+      const fetchPromise = fetch(event.request)
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseToCache = networkResponse.clone();
@@ -99,11 +91,12 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch((error) => {
-          // Fallback placeholder or fail gracefully
-          console.warn('Network request failed in offline mode:', event.request.url);
-          throw error;
+        .catch(() => {
+          // Offline fallback
+          return cachedResponse;
         });
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
