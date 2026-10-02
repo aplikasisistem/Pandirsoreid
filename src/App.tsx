@@ -17,8 +17,10 @@ import { Footer } from './components/Footer';
 import { BottomNav } from './components/BottomNav';
 import { Sparkles, ShoppingBag, ShieldCheck, ArrowRight, MessageCircle } from 'lucide-react';
 import { OFFICIAL_WA_NUMBER, DISPLAY_WA_NUMBER } from './utils/formatter';
+import { useToast } from './context/ToastContext';
 
 export default function App() {
+  const { showToast } = useToast();
   // Accounts state synced real-time from database service
   const [accounts, setAccounts] = useState<GameAccount[]>([]);
   const [isSellerAuthenticated, setIsSellerAuthenticated] = useState<boolean>(false);
@@ -184,8 +186,6 @@ export default function App() {
   const handleConfirmDelete = async () => {
     if (accountToDelete) {
       await realtimeSync.deleteAccount(accountToDelete.id);
-      setIsDeleteModalOpen(false);
-      setAccountToDelete(null);
     }
   };
 
@@ -193,6 +193,13 @@ export default function App() {
     const nextStatus = account.status === 'READY' ? 'SOLD_OUT' : 'READY';
     const nextStock = nextStatus === 'READY' ? 1 : 0;
     await realtimeSync.updateAccountStock(account.id, nextStock, nextStatus);
+    showToast({
+      type: 'info',
+      title: 'Status Stok Diperbarui',
+      message: `Status lapak "${account.title}" (${account.id}) diubah menjadi ${
+        nextStatus === 'READY' ? 'Instan Ready' : 'Sold Out'
+      }.`,
+    });
   };
 
   // Anti-fraud gate trigger
@@ -236,7 +243,10 @@ export default function App() {
           account={accountToDelete}
           isOpen={isDeleteModalOpen}
           onConfirm={handleConfirmDelete}
-          onCancel={() => setIsDeleteModalOpen(false)}
+          onCancel={() => {
+            setIsDeleteModalOpen(false);
+            setAccountToDelete(null);
+          }}
         />
 
         <CloudSyncSettingsModal

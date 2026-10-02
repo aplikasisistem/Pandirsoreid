@@ -1,0 +1,141 @@
+{
+  "entities": {
+    "GameAccount": {
+      "title": "GameAccount",
+      "description": "Akun game yang terdaftar di katalog PandirStore (MLBB & Free Fire)",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID unik akun game",
+          "maxLength": 64
+        },
+        "game": {
+          "type": "string",
+          "description": "Kategori game (MLBB atau FREE_FIRE)",
+          "enum": ["MLBB", "FREE_FIRE"]
+        },
+        "title": {
+          "type": "string",
+          "description": "Judul lapak akun",
+          "maxLength": 150
+        },
+        "price": {
+          "type": "number",
+          "description": "Harga jual akun"
+        },
+        "costPrice": {
+          "type": "number",
+          "description": "Harga modal (COGS) akun"
+        },
+        "discountPrice": {
+          "type": "number",
+          "description": "Harga coret/diskon"
+        },
+        "stock": {
+          "type": "number",
+          "description": "Jumlah stok akun"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status ketersediaan stok",
+          "enum": ["READY", "SOLD_OUT", "BOOKED"]
+        },
+        "isNego": {
+          "type": "boolean",
+          "description": "Apakah harga bisa dinegosiasikan"
+        },
+        "whatsappNumber": {
+          "type": "string",
+          "description": "Nomor WhatsApp admin",
+          "maxLength": 25
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating lapak"
+        },
+        "soldCount": {
+          "type": "number",
+          "description": "Jumlah transaksi sukses"
+        },
+        "thumbnail": {
+          "type": "string",
+          "description": "URL thumbnail utama gambar akun"
+        },
+        "gallery": {
+          "type": "array",
+          "description": "Daftar foto screenshot galeri akun"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Catatan tambahan penjual"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Waktu pembuatan dalam milidetik"
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Waktu pembaruan terakhir dalam milidetik"
+        }
+      },
+      "required": ["id", "game", "title", "price", "stock", "status"]
+    },
+    "SaleRecord": {
+      "title": "SaleRecord",
+      "description": "Catatan transaksi penjualan akun untuk kalkulasi laba/rugi",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID transaksi penjualan",
+          "maxLength": 64
+        },
+        "accountId": {
+          "type": "string",
+          "description": "ID akun yang terjual",
+          "maxLength": 64
+        },
+        "accountTitle": {
+          "type": "string",
+          "description": "Judul akun terjual"
+        },
+        "game": {
+          "type": "string",
+          "description": "Game akun yang terjual"
+        },
+        "sellingPrice": {
+          "type": "number",
+          "description": "Harga jual aktual"
+        },
+        "costPrice": {
+          "type": "number",
+          "description": "Harga modal (COGS)"
+        },
+        "profit": {
+          "type": "number",
+          "description": "Laba kotor per transaksi"
+        },
+        "date": {
+          "type": "number",
+          "description": "Waktu transaksi dalam milidetik"
+        }
+      },
+      "required": ["id", "accountId", "accountTitle", "sellingPrice", "profit", "date"]
+    }
+  },
+  "firestore": {
+    "/gamestore_accounts/{accountId}": {
+      "schema": {
+        "$ref": "#/entities/GameAccount"
+      },
+      "description": "Koleksi akun marketplace yang tersinkronisasi real-time antar perangkat"
+    },
+    "/sales_records/{saleId}": {
+      "schema": {
+        "$ref": "#/entities/SaleRecord"
+      },
+      "description": "Koleksi riwayat transaksi penjualan"
+    }
+  }
+}

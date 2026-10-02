@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   X,
   Plus,
@@ -13,11 +13,13 @@ import {
   Camera,
   RefreshCw,
   AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import { GameAccount, GameType, AccountStatus, GalleryItem } from '../types';
 import { formatNumber, parseRupiahInput } from '../utils/formatter';
 import { compressAndReadImage } from '../utils/imageUpload';
 import { MLBBLogo, FreeFireLogo } from './GameBadges';
+import { useToast } from '../context/ToastContext';
 
 interface AddEditAccountModalProps {
   isOpen: boolean;
@@ -67,9 +69,10 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
   const [ffBind, setFfBind] = useState('FB Only / Unbind All');
   const [ffVaultCount, setFfVaultCount] = useState<number>(350);
 
-  // Gallery items & upload state
+  const { showToast } = useToast();
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -78,6 +81,82 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
   const newProofFileInputRef = useRef<HTMLInputElement>(null);
   const replaceProofFileInputRef = useRef<HTMLInputElement>(null);
   const [replaceTargetIndex, setReplaceTargetIndex] = useState<number | null>(null);
+
+  // Calculate dirty state (state dirty check to detect unsaved changes)
+  const isDirty = useMemo(() => {
+    if (!isEditing) {
+      // In create mode: considered dirty if user has entered title or price
+      return title.trim().length > 0;
+    }
+    if (!initialAccount) return false;
+
+    const initialPriceStr = formatNumber(initialAccount.price);
+    const initialCostStr = initialAccount.costPrice
+      ? formatNumber(initialAccount.costPrice)
+      : formatNumber(Math.round(initialAccount.price * 0.7));
+
+    if (game !== initialAccount.game) return true;
+    if (title.trim() !== (initialAccount.title || '').trim()) return true;
+    if (priceInput.trim() !== initialPriceStr) return true;
+    if (costPriceInput.trim() !== initialCostStr) return true;
+    if (stock !== initialAccount.stock) return true;
+    if (status !== initialAccount.status) return true;
+    if (isNego !== initialAccount.isNego) return true;
+    if (whatsappNumber.trim() !== (initialAccount.whatsappNumber || '085717046895').trim()) return true;
+    if (thumbnail !== initialAccount.thumbnail) return true;
+    if (notes.trim() !== (initialAccount.notes || '').trim()) return true;
+
+    if (game === 'MLBB' && initialAccount.mlSpecs) {
+      if (mlRank !== (initialAccount.mlSpecs.rank || '')) return true;
+      if (mlTotalHero !== (initialAccount.mlSpecs.totalHero || 0)) return true;
+      if (mlTotalSkin !== (initialAccount.mlSpecs.totalSkin || 0)) return true;
+      if (mlRareSkins !== (initialAccount.mlSpecs.rareSkins || []).join(', ')) return true;
+      if (mlEmblem !== (initialAccount.mlSpecs.emblem || '')) return true;
+      if (mlBind !== (initialAccount.mlSpecs.bindStatus || '')) return true;
+      if (mlWinrate !== (initialAccount.mlSpecs.winrate || '')) return true;
+    }
+
+    if (game === 'FREE_FIRE' && initialAccount.ffSpecs) {
+      if (ffLevel !== (initialAccount.ffSpecs.level || 0)) return true;
+      if (ffElitePass !== (initialAccount.ffSpecs.elitePass || '')) return true;
+      if (ffMainBundles !== (initialAccount.ffSpecs.mainBundles || []).join(', ')) return true;
+      if (ffEvoGuns !== (initialAccount.ffSpecs.evoGuns || []).join(', ')) return true;
+      if (ffBind !== (initialAccount.ffSpecs.bindStatus || '')) return true;
+      if (ffVaultCount !== (initialAccount.ffSpecs.vaultCount || 200)) return true;
+    }
+
+    // Check gallery changes
+    if (JSON.stringify(gallery) !== JSON.stringify(initialAccount.gallery || [])) return true;
+
+    return false;
+  }, [
+    isEditing,
+    initialAccount,
+    game,
+    title,
+    priceInput,
+    costPriceInput,
+    stock,
+    status,
+    isNego,
+    whatsappNumber,
+    thumbnail,
+    notes,
+    mlRank,
+    mlTotalHero,
+    mlTotalSkin,
+    mlRareSkins,
+    mlEmblem,
+    mlBind,
+    mlWinrate,
+    ffLevel,
+    ffElitePass,
+    ffMainBundles,
+    ffEvoGuns,
+    ffBind,
+    ffVaultCount,
+    gallery,
+  ]);
 
   // Initialize form when opening
   useEffect(() => {
@@ -339,12 +418,27 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
     }
 
     try {
+      setSubmitError(null);
       await onSave(accountData);
       setIsSubmitting(false);
+      showToast({
+        type: 'success',
+        title: isEditing ? 'Data Berhasil Diperbarui' : 'Lapak Berhasil Dibuat',
+        message: isEditing
+          ? `Perubahan akun "${accountData.title}" (${accountData.id}) berhasil disimpan ke database real-time.`
+          : `Lapak akun "${accountData.title}" berhasil ditambahkan ke katalog.`,
+      });
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      const errorMsg = err?.message || 'Gagal menyimpan data ke database. Silakan coba lagi.';
+      setSubmitError(errorMsg);
       setIsSubmitting(false);
+      showToast({
+        type: 'error',
+        title: 'Gagal Menyimpan Perubahan',
+        message: errorMsg,
+      });
     }
   };
 
@@ -378,8 +472,49 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
           </button>
         </div>
 
+        {/* Dynamic Unsaved Changes Banner (State Dirty Check Indicator) */}
+        {isEditing && (
+          <div
+            className={`px-5 py-2.5 border-b text-xs flex items-center justify-between transition-colors ${
+              isDirty
+                ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                : 'bg-slate-950/80 border-slate-800 text-slate-400'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {isDirty ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                  <span className="font-bold text-amber-200">Perubahan Terdeteksi (Unsaved Changes)</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Semua data input saat ini sinkron dengan server</span>
+                </>
+              )}
+            </div>
+            <span className="text-[11px] font-medium hidden sm:inline">
+              {isDirty
+                ? 'Tombol "Simpan Perubahan" telah aktif di bawah'
+                : 'Belum ada input yang diubah'}
+            </span>
+          </div>
+        )}
+
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 text-xs sm:text-sm">
+          {/* Submission Error Banner if any */}
+          {submitError && (
+            <div className="p-3.5 rounded-xl bg-red-950/80 border border-red-500/50 flex items-start gap-2.5 text-xs text-red-200 animate-fadeIn">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <div className="flex-1 leading-relaxed">
+                <span className="font-bold text-red-300">Gagal Menyimpan: </span>
+                {submitError}
+              </div>
+            </div>
+          )}
+
           {/* Section 1: Kategori Game */}
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
@@ -1006,23 +1141,70 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
           </div>
 
           {/* Footer Submit */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors min-h-[44px]"
-            >
-              Batal
-            </button>
+          <div className="pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="text-xs">
+              {isEditing ? (
+                isDirty ? (
+                  <div className="flex items-center gap-2 text-amber-400 font-semibold animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span>Ada perubahan input yang belum disimpan</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-slate-400">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Formulir sinkron (Belum ada perubahan)</span>
+                  </div>
+                )
+              ) : (
+                <span className="text-slate-400 text-[11px]">
+                  Isi data akun dengan teliti sebelum mempublikasikan
+                </span>
+              )}
+            </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-950 transition-all flex items-center gap-2 min-h-[44px]"
-            >
-              <Save className="w-4 h-4" />
-              <span>{isSubmitting ? 'Menyimpan ke Database...' : 'Simpan Perubahan'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 font-semibold text-xs transition-colors min-h-[44px]"
+              >
+                Batal
+              </button>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || (isEditing && !isDirty)}
+                className={`flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-white font-bold text-xs sm:text-sm shadow-lg transition-all flex items-center justify-center gap-2 min-h-[44px] ${
+                  isEditing && !isDirty
+                    ? 'bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed shadow-none opacity-60'
+                    : 'bg-gradient-to-r from-orange-600 via-amber-600 to-orange-500 hover:from-orange-500 hover:to-amber-500 active:scale-95 shadow-orange-950 ring-2 ring-orange-500/40 cursor-pointer'
+                }`}
+                title={
+                  isEditing && !isDirty
+                    ? 'Ubah data untuk mengaktifkan tombol simpan'
+                    : 'Kirim data perubahan ke server database real-time'
+                }
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Menyimpan ke Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>
+                      {isEditing
+                        ? isDirty
+                          ? 'Simpan Perubahan'
+                          : 'Tidak Ada Perubahan'
+                        : 'Tambah Lapak Baru'}
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

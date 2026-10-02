@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function for ID verification
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Public catalog accounts with real-time sync
+    match /gamestore_accounts/{accountId} {
+      allow read: if true;
+      allow create, update, delete: if isValidId(accountId);
+    }
+
+    // Sales records for admin financial tracking
+    match /sales_records/{saleId} {
+      allow read: if true;
+      allow create, update, delete: if isValidId(saleId);
+    }
+  }
+}
