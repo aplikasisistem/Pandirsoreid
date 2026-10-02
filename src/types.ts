@@ -41,6 +41,8 @@ export interface SaleRecord {
 
 export interface GameAccount {
   id: string;
+  idLapak?: string; // ID Akun / Kode Lapak (contoh: ML-305 atau 123456789)
+  accountId?: string;
   game: GameType;
   title: string;
   price: number; // Harga Jual

@@ -99,7 +99,7 @@ export const AccountDetailModal: React.FC<AccountDetailModalProps> = ({
           <div className="flex items-center gap-2">
             <GameBadge game={account.game} size="md" />
             <span className="text-xs font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-              ID: {account.id}
+              ID: {account.idLapak || account.accountId || account.id}
             </span>
           </div>
 

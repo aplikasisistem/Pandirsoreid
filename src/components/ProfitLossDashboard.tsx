@@ -147,53 +147,59 @@ export const ProfitLossDashboard: React.FC<ProfitLossDashboardProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Header & Controls Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/90 p-4 rounded-2xl border border-slate-800">
-        <div>
-          <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-            <PieChart className="w-5 h-5 text-orange-400" />
-            <span>Akumulasi Laba / Rugi (Profit &amp; Loss Dashboard)</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Rekapitulasi keuangan real-time: Total Penjualan, Total Modal (COGS), dan Laba Bersih.
-          </p>
+    <div className="space-y-3.5 sm:space-y-4 animate-fadeIn">
+      {/* Header & Controls Bar - Compact */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-slate-900/90 py-2.5 px-3.5 sm:px-4 rounded-xl border border-slate-800 shadow-md">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center shrink-0">
+            <PieChart className="w-4 h-4 text-orange-400" />
+          </div>
+          <div>
+            <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+              <span>Akumulasi Laba / Rugi (Profit &amp; Loss)</span>
+            </h2>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Rekapitulasi keuangan: Total Penjualan, Total Modal (COGS), dan Laba Bersih.
+            </p>
+          </div>
         </div>
 
-        {/* Action Buttons: Export CSV & Print PDF */}
-        <div className="flex items-center gap-2">
+        {/* Action Buttons: Export CSV & Print PDF - Compact */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleExportCSV}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all shadow-sm active:scale-95"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all shadow-sm active:scale-95 h-8"
             title="Download file Excel / CSV"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
             <span>Export CSV</span>
           </button>
 
           <button
             onClick={handlePrintPDF}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition-all shadow-md shadow-orange-950 active:scale-95"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold transition-all shadow-sm shadow-orange-950 active:scale-95 h-8"
             title="Cetak atau simpan sebagai PDF"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-3.5 h-3.5" />
             <span>Cetak PDF</span>
           </button>
         </div>
       </div>
 
-      {/* Period Filter Tabs */}
-      <div className="bg-slate-900/70 p-3 rounded-2xl border border-slate-800 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-            <span className="text-xs text-slate-400 font-semibold mr-1 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Periode:</span>
+      {/* Period Filter, Game Filter & Search - Responsive Inline 1 Row */}
+      <div className="bg-slate-900/80 p-2 sm:px-3 rounded-xl border border-slate-800 space-y-2">
+        <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
+          {/* Period Selection */}
+          <div className="flex items-center gap-1 flex-wrap sm:flex-nowrap">
+            <span className="text-[11px] text-slate-400 font-bold mr-1 flex items-center gap-1 shrink-0">
+              <Calendar className="w-3.5 h-3.5 text-orange-400" />
+              <span className="hidden sm:inline">Periode:</span>
             </span>
 
             <button
+              type="button"
               onClick={() => setPeriod('today')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
                 period === 'today'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
@@ -203,30 +209,33 @@ export const ProfitLossDashboard: React.FC<ProfitLossDashboardProps> = ({
             </button>
 
             <button
+              type="button"
               onClick={() => setPeriod('week')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
                 period === 'week'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
-              7 Hari Terakhir
+              Mingguan
             </button>
 
             <button
+              type="button"
               onClick={() => setPeriod('month')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
                 period === 'month'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
-              Bulan Ini (30 Hari)
+              Bulanan
             </button>
 
             <button
+              type="button"
               onClick={() => setPeriod('year')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+              className={`h-8 px-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
                 period === 'year'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
@@ -236,73 +245,92 @@ export const ProfitLossDashboard: React.FC<ProfitLossDashboardProps> = ({
             </button>
 
             <button
+              type="button"
               onClick={() => setPeriod('custom')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+              className={`h-8 px-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
                 period === 'custom'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
-              Custom Range
+              Kustom
             </button>
           </div>
 
-          {/* Game Quick Filter in Profit/Loss */}
-          <div className="flex items-center gap-1.5 text-xs">
-            <button
-              onClick={() => setSelectedGameFilter('ALL')}
-              className={`px-2 py-1 rounded-md font-semibold ${
-                selectedGameFilter === 'ALL'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Semua Game
-            </button>
-            <button
-              onClick={() => setSelectedGameFilter('MLBB')}
-              className={`px-2 py-1 rounded-md font-semibold flex items-center gap-1 ${
-                selectedGameFilter === 'MLBB'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-400 hover:text-blue-300'
-              }`}
-            >
-              <MLBBLogo className="w-3.5 h-3.5" />
-              <span>MLBB</span>
-            </button>
-            <button
-              onClick={() => setSelectedGameFilter('FREE_FIRE')}
-              className={`px-2 py-1 rounded-md font-semibold flex items-center gap-1 ${
-                selectedGameFilter === 'FREE_FIRE'
-                  ? 'bg-orange-600 text-white'
-                  : 'text-slate-400 hover:text-orange-300'
-              }`}
-            >
-              <FreeFireLogo className="w-3.5 h-3.5" />
-              <span>FF</span>
-            </button>
+          {/* Game Quick Filter & Search Bar in Same Inline Row */}
+          <div className="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-end">
+            <div className="flex items-center gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800 h-8">
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter('ALL')}
+                className={`h-7 px-2 rounded-md text-xs font-semibold transition-colors ${
+                  selectedGameFilter === 'ALL'
+                    ? 'bg-slate-800 text-white'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Semua
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter('MLBB')}
+                className={`h-7 px-2 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors ${
+                  selectedGameFilter === 'MLBB'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-400 hover:text-blue-300'
+                }`}
+              >
+                <MLBBLogo className="w-3.5 h-3.5" />
+                <span>MLBB</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter('FREE_FIRE')}
+                className={`h-7 px-2 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors ${
+                  selectedGameFilter === 'FREE_FIRE'
+                    ? 'bg-orange-600 text-white'
+                    : 'text-slate-400 hover:text-orange-300'
+                }`}
+              >
+                <FreeFireLogo className="w-3.5 h-3.5" />
+                <span>FF</span>
+              </button>
+            </div>
+
+            {/* Compact Search Bar with equal height h-8 */}
+            <div className="relative flex-1 sm:w-44 lg:w-52">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari ID/Judul..."
+                className="h-8 w-full pl-8 pr-2.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+              />
+            </div>
           </div>
         </div>
 
         {/* Custom Range Date Pickers */}
         {period === 'custom' && (
           <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800 text-xs">
-            <span className="text-slate-400">Mulai:</span>
+            <span className="text-slate-400 text-[11px]">Mulai:</span>
             <input
               type="date"
               value={customStartDate}
               onChange={(e) => setCustomStartDate(e.target.value)}
-              className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-orange-500"
+              className="h-7 px-2 rounded-md bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-orange-500"
             />
-            <span className="text-slate-400">Sampai:</span>
+            <span className="text-slate-400 text-[11px]">Sampai:</span>
             <input
               type="date"
               value={customEndDate}
               onChange={(e) => setCustomEndDate(e.target.value)}
-              className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-orange-500"
+              className="h-7 px-2 rounded-md bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-orange-500"
             />
             {(customStartDate || customEndDate) && (
               <button
+                type="button"
                 onClick={() => {
                   setCustomStartDate('');
                   setCustomEndDate('');
@@ -316,79 +344,87 @@ export const ProfitLossDashboard: React.FC<ProfitLossDashboardProps> = ({
         )}
       </div>
 
-      {/* 4 Main Financial KPI Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {/* 4 Main Financial KPI Metric Cards - Compact */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         {/* Total Penjualan (Revenue) */}
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-950/60 to-slate-900 border border-blue-600/30 space-y-1 shadow-md">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Total Penjualan (Revenue)</span>
-            <DollarSign className="w-4 h-4 text-blue-400" />
+        <div className="p-3 sm:p-3.5 rounded-xl bg-gradient-to-br from-blue-950/60 to-slate-900 border border-blue-600/30 relative overflow-hidden shadow-md">
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span className="font-bold text-blue-400 uppercase tracking-wider">Total Penjualan</span>
+            <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400">
+              <DollarSign className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight truncate">
+          <div className="mt-1.5 text-base sm:text-lg lg:text-xl font-black text-white font-mono truncate">
             {formatRupiah(totalRevenue)}
           </div>
-          <div className="text-[11px] text-blue-300 flex items-center justify-between">
+          <div className="text-[10px] text-blue-300 mt-0.5 flex items-center justify-between">
             <span>{filteredSales.length} Transaksi Selesai</span>
             <span className="font-semibold">∑ (Harga Jual)</span>
           </div>
         </div>
 
         {/* Total Modal (COGS) */}
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 space-y-1 shadow-md">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Total Modal (COGS)</span>
-            <span className="text-slate-500 font-mono text-xs">Harga Beli</span>
+        <div className="p-3 sm:p-3.5 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 relative overflow-hidden shadow-md">
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span className="font-bold text-amber-400 uppercase tracking-wider">Total Modal (COGS)</span>
+            <span className="text-slate-500 font-mono text-[10px]">Harga Beli</span>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-slate-200 font-mono tracking-tight truncate">
+          <div className="mt-1.5 text-base sm:text-lg lg:text-xl font-black text-slate-200 font-mono truncate">
             {formatRupiah(totalCOGS)}
           </div>
-          <div className="text-[11px] text-slate-400 flex items-center justify-between">
-            <span>Biaya Pengadaan Akun</span>
+          <div className="text-[10px] text-slate-400 mt-0.5 flex items-center justify-between">
+            <span>Pengadaan Akun</span>
             <span className="font-semibold">∑ (Harga Beli)</span>
           </div>
         </div>
 
         {/* Laba / Rugi Bersih (Net Profit/Loss) */}
         <div
-          className={`p-4 rounded-2xl border space-y-1 shadow-md ${
+          className={`p-3 sm:p-3.5 rounded-xl border relative overflow-hidden shadow-md ${
             netProfit >= 0
               ? 'bg-gradient-to-br from-emerald-950/60 to-slate-900 border-emerald-500/40'
               : 'bg-gradient-to-br from-red-950/60 to-slate-900 border-red-500/40'
           }`}
         >
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Laba / Rugi Bersih</span>
-            {netProfit >= 0 ? (
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
-            ) : (
-              <TrendingDown className="w-4 h-4 text-red-400" />
-            )}
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span className={`font-bold uppercase tracking-wider ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              Laba Bersih
+            </span>
+            <div className={`p-1.5 rounded-lg ${netProfit >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+              {netProfit >= 0 ? (
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-red-400" />
+              )}
+            </div>
           </div>
           <div
-            className={`text-xl sm:text-2xl font-black font-mono tracking-tight truncate ${
+            className={`mt-1.5 text-base sm:text-lg lg:text-xl font-black font-mono truncate ${
               netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'
             }`}
           >
             {netProfit >= 0 ? '+' : ''}
             {formatRupiah(netProfit)}
           </div>
-          <div className="text-[11px] text-emerald-300/80 flex items-center justify-between">
+          <div className="text-[10px] text-emerald-300/80 mt-0.5 flex items-center justify-between">
             <span>Penjualan - Modal</span>
             <span className="font-bold">Net Profit</span>
           </div>
         </div>
 
         {/* Margin Keuntungan (%) */}
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-950/60 to-slate-900 border border-amber-600/30 space-y-1 shadow-md">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Margin Keuntungan</span>
-            <ArrowUpRight className="w-4 h-4 text-amber-400" />
+        <div className="p-3 sm:p-3.5 rounded-xl bg-gradient-to-br from-amber-950/60 to-slate-900 border border-amber-600/30 relative overflow-hidden shadow-md">
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span className="font-bold text-amber-400 uppercase tracking-wider">Margin Keuntungan</span>
+            <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+              <ArrowUpRight className="w-4 h-4 text-amber-400" />
+            </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-amber-400 font-mono tracking-tight">
+          <div className="mt-1.5 text-base sm:text-lg lg:text-xl font-black text-amber-400 font-mono truncate">
             {profitMarginPercent}%
           </div>
-          <div className="text-[11px] text-amber-300/80 flex items-center justify-between">
-            <span>Rata-Rata Profit Margin</span>
+          <div className="text-[10px] text-amber-300/80 mt-0.5 flex items-center justify-between">
+            <span>Rata-Rata Margin</span>
             <span className="font-semibold">Profit / Sales</span>
           </div>
         </div>

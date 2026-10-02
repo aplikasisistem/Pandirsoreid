@@ -103,7 +103,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 
         {/* Question Text */}
         <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800 text-xs sm:text-sm text-slate-200 leading-relaxed">
-          Apakah Anda yakin ingin menghapus lapak <strong className="text-white">"{account.title}"</strong> (ID: {account.id})? Tindakan ini tidak dapat dibatalkan.
+          Apakah Anda yakin ingin menghapus lapak <strong className="text-white">"{account.title}"</strong> (ID: {account.idLapak || account.accountId || account.id})? Tindakan ini tidak dapat dibatalkan.
         </div>
 
         {/* Error Alert Banner if any */}

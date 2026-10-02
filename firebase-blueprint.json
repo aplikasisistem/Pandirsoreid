@@ -10,6 +10,16 @@
           "description": "ID unik akun game",
           "maxLength": 64
         },
+        "idLapak": {
+          "type": "string",
+          "description": "Kode lapak atau ID akun kustom",
+          "maxLength": 64
+        },
+        "accountId": {
+          "type": "string",
+          "description": "ID akun yang ditentukan penjual",
+          "maxLength": 64
+        },
         "game": {
           "type": "string",
           "description": "Kategori game (MLBB atau FREE_FIRE)",

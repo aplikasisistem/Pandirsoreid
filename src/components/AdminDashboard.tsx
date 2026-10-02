@@ -300,38 +300,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header Bar with Export & Live DB Sync Badge */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl backdrop-blur-md">
-        <div className="flex items-center gap-3">
+    <div className="space-y-3.5 sm:space-y-4">
+      {/* Top Header Bar with Export & Live DB Sync Badge - Compact */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-xl py-2.5 px-3.5 sm:px-4 flex flex-col md:flex-row md:items-center justify-between gap-2.5 shadow-md backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
           {onBackToKatalog && (
             <button
               onClick={onBackToKatalog}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
               title="Kembali"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
           )}
 
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 p-[2px] flex items-center justify-center shrink-0">
-            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-              <PandirStoreEmblem className="w-6 h-6" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 p-[1.5px] flex items-center justify-center shrink-0">
+            <div className="w-full h-full bg-slate-950 rounded-[6px] flex items-center justify-center">
+              <PandirStoreEmblem className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </div>
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-black text-white tracking-tight">
+              <h1 className="text-sm sm:text-base font-bold text-white tracking-tight">
                 Admin Dashboard Keuangan &amp; Laba Rugi
               </h1>
-              <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-bold border border-orange-500/30 uppercase tracking-wider">
+              <span className="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 text-[9px] font-bold border border-orange-500/30 uppercase tracking-wider">
                 Real-Time DB
               </span>
             </div>
-            <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-              <span>Rekapitulasi otomatis Total Penjualan, Total Modal (COGS), dan Laba Bersih.</span>
-              <span className="text-slate-600">•</span>
+            <p className="text-[11px] text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+              <span>Rekapitulasi otomatis Penjualan, Modal (COGS), dan Laba Bersih.</span>
+              <span className="text-slate-600 hidden sm:inline">•</span>
               <span className="text-emerald-400 font-mono flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                 Updated: {lastUpdated.toLocaleTimeString('id-ID')}
@@ -340,108 +340,117 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Action Export Buttons */}
-        <div className="flex items-center gap-2 print:hidden">
+        {/* Action Export Buttons - Compact */}
+        <div className="flex items-center gap-2 print:hidden shrink-0">
           <button
             onClick={handleExportExcelCSV}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition-all shadow-md active:scale-95 min-h-[40px]"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition-all shadow-sm active:scale-95 h-8"
             title="Download Laporan Format Excel / CSV"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-            <span>Export Excel / CSV</span>
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Export CSV</span>
           </button>
 
           <button
             onClick={handleExportPDF}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition-all shadow-md shadow-orange-950/40 active:scale-95 min-h-[40px]"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold transition-all shadow-sm shadow-orange-950/40 active:scale-95 h-8"
             title="Cetak atau Simpan sebagai PDF"
           >
-            <Printer className="w-4 h-4" />
-            <span>Export PDF / Print</span>
+            <Printer className="w-3.5 h-3.5" />
+            <span>Cetak PDF</span>
           </button>
         </div>
       </div>
 
-      {/* Date Range & Filter Bar */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3 print:hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Daily, Weekly, Monthly Filter Buttons */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-            <span className="text-xs text-slate-400 font-bold mr-1 flex items-center gap-1">
+      {/* Date Range, Game Filter & Search Bar - Responsive Inline 1 Row */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2 sm:px-3 print:hidden space-y-2">
+        <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
+          {/* Filter Periode (Harian, Mingguan, Bulanan, Semua, Kustom) */}
+          <div className="flex items-center gap-1 flex-wrap sm:flex-nowrap">
+            <span className="text-[11px] text-slate-400 font-bold mr-1 flex items-center gap-1 shrink-0">
               <Calendar className="w-3.5 h-3.5 text-orange-400" />
-              <span>Filter Periode:</span>
+              <span className="hidden sm:inline">Periode:</span>
             </span>
 
             <button
+              type="button"
               onClick={() => setDateRange('daily')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[34px] ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                 dateRange === 'daily'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
-              Harian (Daily)
+              Harian
             </button>
 
             <button
+              type="button"
               onClick={() => setDateRange('weekly')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[34px] ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                 dateRange === 'weekly'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
-              Mingguan (Weekly)
+              Mingguan
             </button>
 
             <button
+              type="button"
               onClick={() => setDateRange('monthly')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[34px] ${
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                 dateRange === 'monthly'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
-              Bulanan (Monthly)
+              Bulanan
             </button>
 
             <button
+              type="button"
               onClick={() => setDateRange('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[34px] ${
+              className={`h-8 px-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                 dateRange === 'all'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
-              Semua (All Time)
+              Semua
             </button>
 
             <button
+              type="button"
               onClick={() => setDateRange('custom')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-[34px] ${
+              className={`h-8 px-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                 dateRange === 'custom'
                   ? 'bg-orange-600 text-white shadow-sm'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
+              title="Pilih rentang tanggal khusus"
             >
-              Kustom Tanggal
+              Kustom
             </button>
           </div>
 
-          {/* Game Selection & Search */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          {/* Game Selection & Search Aligned in Same Row */}
+          <div className="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-end">
+            {/* Game Selection */}
+            <div className="flex items-center gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800 h-8">
               <button
+                type="button"
                 onClick={() => setSelectedGame('ALL')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                className={`h-7 px-2 rounded-md text-xs font-semibold transition-colors ${
                   selectedGame === 'ALL' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Semua
               </button>
               <button
+                type="button"
                 onClick={() => setSelectedGame('MLBB')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${
+                className={`h-7 px-2 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors ${
                   selectedGame === 'MLBB' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -449,8 +458,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <span>MLBB</span>
               </button>
               <button
+                type="button"
                 onClick={() => setSelectedGame('FREE_FIRE')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${
+                className={`h-7 px-2 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors ${
                   selectedGame === 'FREE_FIRE' ? 'bg-orange-600 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -459,14 +469,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </button>
             </div>
 
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            {/* Search Input with equal height h-8 */}
+            <div className="relative flex-1 sm:w-44 lg:w-52">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Cari ID / Judul..."
+                placeholder="Cari ID/Judul..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 w-36 sm:w-44"
+                className="h-8 bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 w-full"
               />
             </div>
           </div>
@@ -474,64 +485,62 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Custom Date Pickers when 'custom' is active */}
         {dateRange === 'custom' && (
-          <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center gap-3 text-xs">
-            <span className="text-slate-400 font-semibold">Rentang Tanggal:</span>
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={customStartDate}
-                onChange={(e) => setCustomStartDate(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-orange-500"
-              />
-              <span className="text-slate-500">s/d</span>
-              <input
-                type="date"
-                value={customEndDate}
-                onChange={(e) => setCustomEndDate(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-orange-500"
-              />
-            </div>
+          <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-slate-400 font-semibold text-[11px]">Rentang:</span>
+            <input
+              type="date"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              className="h-7 bg-slate-950 border border-slate-800 rounded-md px-2 text-xs text-white focus:outline-none focus:border-orange-500"
+            />
+            <span className="text-slate-500 text-[11px]">s/d</span>
+            <input
+              type="date"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              className="h-7 bg-slate-950 border border-slate-800 rounded-md px-2 text-xs text-white focus:outline-none focus:border-orange-500"
+            />
           </div>
         )}
       </div>
 
-      {/* Primary KPI Statistics Cards (Revenue, Total COGS, Net Profit) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {/* Primary KPI Statistics Cards (Revenue, Total COGS, Net Profit, Asset) - Compact */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         {/* Total Penjualan (Revenue) */}
-        <div className="bg-slate-900/90 border border-blue-500/30 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-lg">
+        <div className="bg-slate-900/90 border border-blue-500/30 rounded-xl p-3 sm:p-3.5 relative overflow-hidden shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
-              Total Penjualan (Revenue)
+            <span className="text-[11px] font-bold text-blue-400 uppercase tracking-wider">
+              Total Penjualan
             </span>
-            <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400">
-              <DollarSign className="w-5 h-5" />
+            <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400">
+              <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <h3 className="text-xl sm:text-2xl font-black text-white">
+          <div className="mt-1.5">
+            <h3 className="text-base sm:text-lg lg:text-xl font-black text-white font-mono truncate">
               {formatRupiah(totalRevenue)}
             </h3>
-            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+            <p className="text-[10px] text-slate-400 mt-0.5 flex items-center justify-between">
               <span>Σ (Harga Jual × Terjual)</span>
             </p>
           </div>
         </div>
 
         {/* Total Modal (COGS) */}
-        <div className="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-lg">
+        <div className="bg-slate-900/90 border border-amber-500/30 rounded-xl p-3 sm:p-3.5 relative overflow-hidden shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
               Total Modal (COGS)
             </span>
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
-              <Layers className="w-5 h-5" />
+            <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+              <Layers className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <h3 className="text-xl sm:text-2xl font-black text-white">
+          <div className="mt-1.5">
+            <h3 className="text-base sm:text-lg lg:text-xl font-black text-white font-mono truncate">
               {formatRupiah(totalCOGS)}
             </h3>
-            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+            <p className="text-[10px] text-slate-400 mt-0.5 flex items-center justify-between">
               <span>Σ (Harga Modal × Terjual)</span>
             </p>
           </div>
@@ -539,7 +548,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Laba / Rugi Bersih (Net Profit) */}
         <div
-          className={`border rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-lg ${
+          className={`border rounded-xl p-3 sm:p-3.5 relative overflow-hidden shadow-md ${
             netProfit >= 0
               ? 'bg-gradient-to-br from-emerald-950/60 to-slate-900 border-emerald-500/40'
               : 'bg-gradient-to-br from-red-950/60 to-slate-900 border-red-500/40'
@@ -547,36 +556,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         >
           <div className="flex items-center justify-between">
             <span
-              className={`text-xs font-bold uppercase tracking-wider ${
+              className={`text-[11px] font-bold uppercase tracking-wider ${
                 netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'
               }`}
             >
-              Laba Bersih (Net Profit)
+              Laba Bersih
             </span>
             <div
-              className={`p-2 rounded-xl ${
+              className={`p-1.5 rounded-lg ${
                 netProfit >= 0
                   ? 'bg-emerald-500/20 text-emerald-400'
                   : 'bg-red-500/20 text-red-400'
               }`}
             >
               {netProfit >= 0 ? (
-                <TrendingUp className="w-5 h-5" />
+                <TrendingUp className="w-4 h-4" />
               ) : (
-                <TrendingDown className="w-5 h-5" />
+                <TrendingDown className="w-4 h-4" />
               )}
             </div>
           </div>
-          <div className="mt-3">
+          <div className="mt-1.5">
             <h3
-              className={`text-xl sm:text-2xl font-black ${
+              className={`text-base sm:text-lg lg:text-xl font-black font-mono truncate ${
                 netProfit >= 0 ? 'text-emerald-300' : 'text-red-300'
               }`}
             >
               {netProfit < 0 ? '-' : ''}
               {formatRupiah(Math.abs(netProfit))}
             </h3>
-            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+            <p className="text-[10px] text-slate-400 mt-0.5 flex items-center justify-between">
               <span>Revenue − COGS</span>
               <span className="font-bold text-white ml-1">
                 ({profitMarginPercent}% Margin)
@@ -586,20 +595,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         {/* Nilai Stok Siap Jual (Inventory Asset) */}
-        <div className="bg-slate-900/90 border border-purple-500/30 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-lg">
+        <div className="bg-slate-900/90 border border-purple-500/30 rounded-xl p-3 sm:p-3.5 relative overflow-hidden shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-purple-400 uppercase tracking-wider">
               Nilai Aset Stok Ready
             </span>
-            <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
-              <ShoppingBag className="w-5 h-5" />
+            <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400">
+              <ShoppingBag className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <h3 className="text-xl sm:text-2xl font-black text-white">
+          <div className="mt-1.5">
+            <h3 className="text-base sm:text-lg lg:text-xl font-black text-white font-mono truncate">
               {formatRupiah(inventoryStats.totalReadyValue)}
             </h3>
-            <p className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <p className="text-[10px] text-slate-400 mt-0.5 flex items-center justify-between">
               <span>{inventoryStats.readyCount} Akun Tersedia</span>
               <span className="text-purple-300 font-semibold">
                 Modal: {formatRupiah(inventoryStats.totalReadyCost)}

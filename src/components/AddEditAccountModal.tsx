@@ -44,6 +44,7 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
 
   // General state
   const [game, setGame] = useState<GameType>('MLBB');
+  const [customAccountId, setCustomAccountId] = useState('');
   const [title, setTitle] = useState('');
   const [priceInput, setPriceInput] = useState('');
   const [costPriceInput, setCostPriceInput] = useState('');
@@ -87,6 +88,7 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
   // Reset form cleanly to blank condition
   const resetForm = () => {
     setGame('MLBB');
+    setCustomAccountId('');
     setTitle('');
     setPriceInput('');
     setCostPriceInput('');
@@ -124,6 +126,7 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
     if (isOpen) {
       if (initialAccount) {
         setGame(initialAccount.game);
+        setCustomAccountId(initialAccount.idLapak || initialAccount.accountId || initialAccount.id || '');
         setTitle(initialAccount.title || '');
         setPriceInput(initialAccount.price ? formatNumber(initialAccount.price) : '');
         setCostPriceInput(
@@ -192,7 +195,11 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
   // State dirty check to detect unsaved changes
   const isDirty = useMemo(() => {
     if (!isEditing) {
-      return title.trim().length > 0 || priceInput.trim().length > 0;
+      return (
+        title.trim().length > 0 ||
+        priceInput.trim().length > 0 ||
+        customAccountId.trim().length > 0
+      );
     }
     if (!initialAccount) return false;
 
@@ -200,6 +207,9 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
     const initialCostStr = initialAccount.costPrice
       ? formatNumber(initialAccount.costPrice)
       : formatNumber(Math.round(initialAccount.price * 0.7));
+
+    const initialAccountIdStr = (initialAccount.idLapak || initialAccount.accountId || initialAccount.id || '').trim();
+    if (customAccountId.trim() !== initialAccountIdStr) return true;
 
     if (game !== initialAccount.game) return true;
     if (title.trim() !== (initialAccount.title || '').trim()) return true;
@@ -390,8 +400,16 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
     const costPrice = parsedCost && parsedCost > 0 ? parsedCost : Math.round(price * 0.7);
     const finalThumbnail = thumbnail.trim() || DEFAULT_THUMBNAILS[game];
 
+    const trimmedCustomId = customAccountId.trim();
+    // Jika ID diisi oleh user, gunakan nilai tersebut. Jika dikosongkan, buat ID unik acak (contoh: ML-xxx / FF-xxx)
+    const generatedFallbackId = `${game === 'MLBB' ? 'ML' : 'FF'}-${Date.now().toString().slice(-4)}`;
+    const finalId = initialAccount ? initialAccount.id : (trimmedCustomId || generatedFallbackId);
+    const finalIdLapak = trimmedCustomId || finalId;
+
     const accountData: any = {
-      id: initialAccount ? initialAccount.id : `${game === 'MLBB' ? 'ML' : 'FF'}-${Date.now().toString().slice(-4)}`,
+      id: finalId,
+      idLapak: finalIdLapak,
+      accountId: finalIdLapak,
       game,
       title: trimmedTitle,
       price,
@@ -600,6 +618,23 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
 
             {game === 'MLBB' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* ID Akun / Kode Lapak */}
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-bold text-orange-400 mb-1 flex items-center justify-between">
+                    <span>ID Akun / Kode Lapak</span>
+                    <span className="text-[10px] text-slate-500 font-normal">
+                      Opsional (Kosongkan jika ingin dibuat otomatis acak e.g. ML-xxx)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={customAccountId}
+                    onChange={(e) => setCustomAccountId(e.target.value)}
+                    placeholder="Contoh: ML-305 atau 123456789"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-[11px] text-slate-400 mb-1">Rank Saat Ini</label>
                   <input
@@ -677,6 +712,23 @@ export const AddEditAccountModal: React.FC<AddEditAccountModalProps> = ({
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* ID Akun / Kode Lapak */}
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-bold text-orange-400 mb-1 flex items-center justify-between">
+                    <span>ID Akun / Kode Lapak</span>
+                    <span className="text-[10px] text-slate-500 font-normal">
+                      Opsional (Kosongkan jika ingin dibuat otomatis acak e.g. FF-xxx)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={customAccountId}
+                    onChange={(e) => setCustomAccountId(e.target.value)}
+                    placeholder="Contoh: FF-305 atau 123456789"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-[11px] text-slate-400 mb-1">Level Akun</label>
                   <input

@@ -71,7 +71,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
         {/* Bottom thumbnail tag: ID Lapak & Nego Status */}
         <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between text-[10px] text-slate-300 font-mono">
           <span className="px-1.5 py-0.5 rounded bg-slate-950/80 border border-slate-800 text-slate-300">
-            ID: {account.id}
+            ID: {account.idLapak || account.accountId || account.id}
           </span>
           {account.isNego && isReady && (
             <span className="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold">

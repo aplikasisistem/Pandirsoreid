@@ -101,7 +101,7 @@ export default function App() {
       if (filter.searchQuery.trim()) {
         const query = filter.searchQuery.toLowerCase();
         const titleMatch = acc.title.toLowerCase().includes(query);
-        const idMatch = acc.id.toLowerCase().includes(query);
+        const idMatch = (acc.idLapak || acc.accountId || acc.id).toLowerCase().includes(query);
         const notesMatch = (acc.notes || '').toLowerCase().includes(query);
 
         // MLBB specs match

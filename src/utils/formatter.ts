@@ -35,7 +35,8 @@ export function parseRupiahInput(value: string): number {
  */
 export function buildBuyWaLink(account: GameAccount): string {
   const formattedPrice = formatNumber(account.price);
-  const message = `Halo Gan, saya tertarik dengan akun ${account.title} (ID Lapak: ${account.id}) seharga Rp ${formattedPrice}. Apakah stok akun ini masih ready?`;
+  const accountIdDisplay = account.idLapak || account.accountId || account.id;
+  const message = `Halo Gan, saya tertarik dengan akun ${account.title} (ID Lapak: ${accountIdDisplay}) seharga Rp ${formattedPrice}. Apakah stok akun ini masih ready?`;
   return `https://wa.me/${OFFICIAL_WA_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
@@ -46,7 +47,8 @@ export function buildBuyWaLink(account: GameAccount): string {
 export function buildNegoWaLink(account: GameAccount, offerPrice: number): string {
   const formattedPrice = formatNumber(account.price);
   const formattedOffer = formatNumber(offerPrice);
-  const message = `Halo Gan, saya mau nego untuk akun ${account.title} (ID Lapak: ${account.id}). Harga buka Rp ${formattedPrice}, saya tawar di angka Rp ${formattedOffer}. Apakah stok masih ada dan harga cocok?`;
+  const accountIdDisplay = account.idLapak || account.accountId || account.id;
+  const message = `Halo Gan, saya mau nego untuk akun ${account.title} (ID Lapak: ${accountIdDisplay}). Harga buka Rp ${formattedPrice}, saya tawar di angka Rp ${formattedOffer}. Apakah stok masih ada dan harga cocok?`;
   return `https://wa.me/${OFFICIAL_WA_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
