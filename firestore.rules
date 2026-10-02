@@ -11,13 +11,24 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Public catalog accounts with real-time sync
+    // Koleksi Akun Game Toko (akun_toko_game)
+    match /akun_toko_game/{accountId} {
+      allow read: if true;
+      allow create, update, delete: if isValidId(accountId);
+    }
+
+    // Koleksi Catatan Penjualan (catatan_penjualan)
+    match /catatan_penjualan/{saleId} {
+      allow read: if true;
+      allow create, update, delete: if isValidId(saleId);
+    }
+
+    // Kompatibilitas koleksi terdahulu
     match /gamestore_accounts/{accountId} {
       allow read: if true;
       allow create, update, delete: if isValidId(accountId);
     }
 
-    // Sales records for admin financial tracking
     match /sales_records/{saleId} {
       allow read: if true;
       allow create, update, delete: if isValidId(saleId);

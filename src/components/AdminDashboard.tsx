@@ -63,6 +63,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Subscribe to real-time database updates
   useEffect(() => {
+    if (initialAccounts) setAccounts(initialAccounts);
+  }, [initialAccounts]);
+
+  useEffect(() => {
+    if (initialSalesRecords) setSalesRecords(initialSalesRecords);
+  }, [initialSalesRecords]);
+
+  useEffect(() => {
     setIsLoading(true);
 
     const unsubscribeAccounts = realtimeSync.subscribe((latestAccounts) => {

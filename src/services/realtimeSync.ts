@@ -6,13 +6,17 @@ import {
   deleteDoc,
   writeBatch,
   getDocs,
+  query,
+  orderBy,
 } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError } from './firebase';
 import { GameAccount, SaleRecord } from '../types';
 import { INITIAL_ACCOUNTS, INITIAL_SALES_RECORDS } from '../data/initialAccounts';
 
-const STORAGE_KEY = 'gamestore_accounts_data_v2';
-const STORAGE_SALES_KEY = 'pandirstore_sales_records_v1';
+const STORAGE_KEY = 'gamestore_accounts_data_v3';
+const STORAGE_SALES_KEY = 'pandirstore_sales_records_v2';
+const ACCOUNTS_COLLECTION = 'akun_toko_game';
+const SALES_COLLECTION = 'catatan_penjualan';
 
 export type SyncMode = 'firebase' | 'broadcast' | 'offline';
 
@@ -28,7 +32,7 @@ class RealtimeSyncService {
   private currentMode: SyncMode = 'firebase';
   private currentAccounts: GameAccount[] = [];
   private currentSales: SaleRecord[] = [];
-  private isInitialized = false;
+  public isConnected = false;
 
   constructor() {
     this.initBroadcastChannel();
@@ -120,36 +124,41 @@ class RealtimeSyncService {
 
   private async initFirestoreSync() {
     try {
-      const accountsCol = collection(db, 'gamestore_accounts');
-      const salesCol = collection(db, 'sales_records');
+      const accountsCol = collection(db, ACCOUNTS_COLLECTION);
+      const salesCol = collection(db, SALES_COLLECTION);
 
-      // Subscribe to real-time accounts collection
+      // 1. Subscribe to real-time accounts collection with onSnapshot
       this.unsubscribeFirestoreAccounts = onSnapshot(
         accountsCol,
         async (snapshot) => {
+          this.isConnected = true;
           if (!snapshot.empty) {
             const remoteAccounts: GameAccount[] = [];
             snapshot.forEach((docSnap) => {
               const data = docSnap.data() as GameAccount;
               remoteAccounts.push(data);
             });
+
+            // Ensure newest accounts appear first (createdAt descending)
             remoteAccounts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
             this.currentAccounts = remoteAccounts;
-            this.saveToLocalStorage(remoteAccounts, false);
+            this.saveToLocalStorage(remoteAccounts, true);
             this.currentMode = 'firebase';
             this.notifyListeners(remoteAccounts);
           } else {
-            // First time seed from INITIAL_ACCOUNTS
+            // First time seeding to akun_toko_game collection
             await this.seedInitialAccounts();
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, 'gamestore_accounts');
+          handleFirestoreError(error, OperationType.GET, ACCOUNTS_COLLECTION);
           this.currentMode = 'broadcast';
+          this.isConnected = false;
         }
       );
 
-      // Subscribe to real-time sales collection
+      // 2. Subscribe to real-time sales collection with onSnapshot
       this.unsubscribeFirestoreSales = onSnapshot(
         salesCol,
         async (snapshot) => {
@@ -158,40 +167,58 @@ class RealtimeSyncService {
             snapshot.forEach((docSnap) => {
               remoteSales.push(docSnap.data() as SaleRecord);
             });
+
+            // Order newest sales transactions first (date descending)
             remoteSales.sort((a, b) => (b.date || 0) - (a.date || 0));
+
             this.currentSales = remoteSales;
-            this.saveSalesToLocalStorage(remoteSales, false);
+            this.saveSalesToLocalStorage(remoteSales, true);
             this.notifySalesListeners(remoteSales);
           } else if (this.currentSales.length > 0) {
             await this.seedInitialSales();
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, 'sales_records');
+          handleFirestoreError(error, OperationType.GET, SALES_COLLECTION);
         }
       );
 
       this.currentMode = 'firebase';
-      this.isInitialized = true;
     } catch (err) {
       console.error('Failed to initialize Firestore sync:', err);
       this.currentMode = 'broadcast';
+      this.isConnected = false;
     }
   }
 
   private async seedInitialAccounts() {
     try {
+      // Check if previous collection 'gamestore_accounts' has existing data to migrate
+      let seedSource = INITIAL_ACCOUNTS;
+      try {
+        const oldSnapshot = await getDocs(collection(db, 'gamestore_accounts'));
+        if (!oldSnapshot.empty) {
+          const oldList: GameAccount[] = [];
+          oldSnapshot.forEach((d) => oldList.push(d.data() as GameAccount));
+          if (oldList.length > 0) {
+            seedSource = oldList;
+          }
+        }
+      } catch {
+        // use INITIAL_ACCOUNTS
+      }
+
       const batch = writeBatch(db);
-      for (const acc of INITIAL_ACCOUNTS) {
-        const docRef = doc(db, 'gamestore_accounts', acc.id);
+      for (const acc of seedSource) {
+        const docRef = doc(db, ACCOUNTS_COLLECTION, acc.id);
         batch.set(docRef, acc);
       }
       await batch.commit();
-      this.currentAccounts = INITIAL_ACCOUNTS;
-      this.saveToLocalStorage(INITIAL_ACCOUNTS, true);
-      this.notifyListeners(INITIAL_ACCOUNTS);
+      this.currentAccounts = seedSource;
+      this.saveToLocalStorage(seedSource, true);
+      this.notifyListeners(seedSource);
     } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, 'gamestore_accounts');
+      handleFirestoreError(e, OperationType.WRITE, ACCOUNTS_COLLECTION);
     }
   }
 
@@ -199,12 +226,12 @@ class RealtimeSyncService {
     try {
       const batch = writeBatch(db);
       for (const sale of INITIAL_SALES_RECORDS) {
-        const docRef = doc(db, 'sales_records', sale.id);
+        const docRef = doc(db, SALES_COLLECTION, sale.id);
         batch.set(docRef, sale);
       }
       await batch.commit();
     } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, 'sales_records');
+      handleFirestoreError(e, OperationType.WRITE, SALES_COLLECTION);
     }
   }
 
@@ -225,7 +252,7 @@ class RealtimeSyncService {
 
   public subscribe(listener: AccountsListener): () => void {
     this.listeners.add(listener);
-    listener(this.currentAccounts);
+    listener([...this.currentAccounts]);
     return () => {
       this.listeners.delete(listener);
     };
@@ -233,7 +260,7 @@ class RealtimeSyncService {
 
   public subscribeSales(listener: SalesListener): () => void {
     this.salesListeners.add(listener);
-    listener(this.currentSales);
+    listener([...this.currentSales]);
     return () => {
       this.salesListeners.delete(listener);
     };
@@ -275,17 +302,17 @@ class RealtimeSyncService {
       updatedAt: now,
     };
 
-    // Update local immediately for responsive UI
+    // Optimistic local update: put at index 0 (newest first)
     const updatedList = [created, ...this.currentAccounts];
     this.currentAccounts = updatedList;
     this.saveToLocalStorage(updatedList, true);
     this.notifyListeners(updatedList);
 
-    // Sync to Firestore
+    // Sync to Firestore 'akun_toko_game'
     try {
-      await setDoc(doc(db, 'gamestore_accounts', created.id), created);
+      await setDoc(doc(db, ACCOUNTS_COLLECTION, created.id), created);
     } catch (e) {
-      handleFirestoreError(e, OperationType.CREATE, `gamestore_accounts/${created.id}`);
+      handleFirestoreError(e, OperationType.CREATE, `${ACCOUNTS_COLLECTION}/${created.id}`);
       throw e;
     }
 
@@ -298,17 +325,17 @@ class RealtimeSyncService {
       updatedAt: Date.now(),
     };
 
-    // Update local immediately for responsive UI
+    // Optimistic local update
     const updatedList = this.currentAccounts.map((a) => (a.id === updated.id ? updated : a));
     this.currentAccounts = updatedList;
     this.saveToLocalStorage(updatedList, true);
     this.notifyListeners(updatedList);
 
-    // Sync to Firestore
+    // Sync to Firestore 'akun_toko_game'
     try {
-      await setDoc(doc(db, 'gamestore_accounts', updated.id), updated);
+      await setDoc(doc(db, ACCOUNTS_COLLECTION, updated.id), updated);
     } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `gamestore_accounts/${updated.id}`);
+      handleFirestoreError(e, OperationType.UPDATE, `${ACCOUNTS_COLLECTION}/${updated.id}`);
       throw e;
     }
 
@@ -354,11 +381,11 @@ class RealtimeSyncService {
     this.saveToLocalStorage(updatedList, true);
     this.notifyListeners(updatedList);
 
-    // Sync to Firestore
+    // Sync to Firestore 'akun_toko_game'
     try {
-      await deleteDoc(doc(db, 'gamestore_accounts', id));
+      await deleteDoc(doc(db, ACCOUNTS_COLLECTION, id));
     } catch (e) {
-      handleFirestoreError(e, OperationType.DELETE, `gamestore_accounts/${id}`);
+      handleFirestoreError(e, OperationType.DELETE, `${ACCOUNTS_COLLECTION}/${id}`);
       throw e;
     }
 
@@ -376,9 +403,9 @@ class RealtimeSyncService {
     this.notifySalesListeners(updated);
 
     try {
-      await setDoc(doc(db, 'sales_records', newRecord.id), newRecord);
+      await setDoc(doc(db, SALES_COLLECTION, newRecord.id), newRecord);
     } catch (e) {
-      handleFirestoreError(e, OperationType.CREATE, `sales_records/${newRecord.id}`);
+      handleFirestoreError(e, OperationType.CREATE, `${SALES_COLLECTION}/${newRecord.id}`);
     }
 
     return newRecord;

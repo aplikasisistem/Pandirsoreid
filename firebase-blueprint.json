@@ -125,13 +125,13 @@
     }
   },
   "firestore": {
-    "/gamestore_accounts/{accountId}": {
+    "/akun_toko_game/{accountId}": {
       "schema": {
         "$ref": "#/entities/GameAccount"
       },
       "description": "Koleksi akun marketplace yang tersinkronisasi real-time antar perangkat"
     },
-    "/sales_records/{saleId}": {
+    "/catatan_penjualan/{saleId}": {
       "schema": {
         "$ref": "#/entities/SaleRecord"
       },
