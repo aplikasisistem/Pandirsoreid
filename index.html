@@ -24,63 +24,57 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      // Immediate cleanup in preview / dev / iframe to ensure preview renders instantly
+      (function() {
+        var isDevOrPreview =
+          window.location.hostname.includes('run.app') ||
+          window.location.hostname.includes('localhost') ||
+          window.location.hostname === '127.0.0.1' ||
+          window.self !== window.top;
+
+        if (isDevOrPreview && 'serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            for (var i = 0; i < regs.length; i++) {
+              regs[i].unregister();
+            }
+          }).catch(function() {});
+          if ('caches' in window) {
+            caches.keys().then(function(keys) {
+              for (var i = 0; i < keys.length; i++) {
+                caches.delete(keys[i]);
+              }
+            }).catch(function() {});
+          }
+        }
+      })();
+    </script>
   </head>
   <body class="bg-slate-950 text-slate-100 antialiased selection:bg-orange-500 selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // Check if running in development preview, Cloud Run proxy, or iframe
-          var isDevOrPreview =
-            window.location.hostname.includes('run.app') ||
-            window.location.hostname.includes('localhost') ||
-            window.location.hostname === '127.0.0.1' ||
-            window.self !== window.top;
+      (function() {
+        var isDevOrPreview =
+          window.location.hostname.includes('run.app') ||
+          window.location.hostname.includes('localhost') ||
+          window.location.hostname === '127.0.0.1' ||
+          window.self !== window.top;
 
-          if (isDevOrPreview) {
-            // Unregister any service workers in preview / dev iframe to avoid script load errors
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-              registrations.forEach(function (reg) {
-                reg.unregister();
+        // Only register in standalone production (Netlify or custom domain)
+        if (!isDevOrPreview && 'serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker
+              .register('/sw.js', { scope: '/' })
+              .then(function(registration) {
+                registration.update().catch(function() {});
+              })
+              .catch(function(err) {
+                console.warn('PWA registration:', err);
               });
-            }).catch(function () {});
-            return;
-          }
-
-          navigator.serviceWorker
-            .register('/sw.js', { scope: '/' })
-            .then((registration) => {
-              // Immediately check for updates on page load
-              registration.update().catch(() => {});
-
-              // When a new version is detected, tell the worker to activate immediately
-              registration.addEventListener('updatefound', () => {
-                const installingWorker = registration.installing;
-                if (installingWorker) {
-                  installingWorker.addEventListener('statechange', () => {
-                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                      installingWorker.postMessage({ type: 'SKIP_WAITING' });
-                    }
-                  });
-                }
-              });
-            })
-            .catch((error) => {
-              console.warn('PWA Service Worker registration skipped:', error);
-            });
-
-          // Smoothly reload the page when the new Service Worker activates
-          let refreshing = false;
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (!refreshing) {
-              refreshing = true;
-              window.location.reload();
-            }
           });
-        });
-      }
+        }
+      })();
     </script>
   </body>
 </html>
-
