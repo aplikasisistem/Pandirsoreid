@@ -60,13 +60,16 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 }
 
 // Test connection on boot
-export async function testConnection() {
+export async function testConnection(): Promise<boolean> {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
+    return true;
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error('Please check your Firebase configuration.');
+      console.warn('Firebase client offline, utilizing cached local data.');
+      return false;
     }
+    return true;
   }
 }
 testConnection();

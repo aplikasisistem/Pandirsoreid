@@ -11,13 +11,18 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Koleksi Akun Game Toko (akun_toko_game)
+    // Healthcheck / connection testing
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Koleksi Akun Game Toko (akun_toko_game) - Real-Time Multi-Device
     match /akun_toko_game/{accountId} {
       allow read: if true;
       allow create, update, delete: if isValidId(accountId);
     }
 
-    // Koleksi Catatan Penjualan (catatan_penjualan)
+    // Koleksi Catatan Penjualan (catatan_penjualan) - Real-Time Multi-Device
     match /catatan_penjualan/{saleId} {
       allow read: if true;
       allow create, update, delete: if isValidId(saleId);

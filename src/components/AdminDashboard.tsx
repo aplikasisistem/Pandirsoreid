@@ -61,15 +61,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all_accounts' | 'sales_ledger'>('all_accounts');
 
-  // Subscribe to real-time database updates
-  useEffect(() => {
-    if (initialAccounts) setAccounts(initialAccounts);
-  }, [initialAccounts]);
-
-  useEffect(() => {
-    if (initialSalesRecords) setSalesRecords(initialSalesRecords);
-  }, [initialSalesRecords]);
-
+  // Subscribe directly to real-time database updates
   useEffect(() => {
     setIsLoading(true);
 

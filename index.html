@@ -31,11 +31,28 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
+          // Check if running in development preview, Cloud Run proxy, or iframe
+          var isDevOrPreview =
+            window.location.hostname.includes('run.app') ||
+            window.location.hostname.includes('localhost') ||
+            window.location.hostname === '127.0.0.1' ||
+            window.self !== window.top;
+
+          if (isDevOrPreview) {
+            // Unregister any service workers in preview / dev iframe to avoid script load errors
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+              registrations.forEach(function (reg) {
+                reg.unregister();
+              });
+            }).catch(function () {});
+            return;
+          }
+
           navigator.serviceWorker
-            .register('/sw.js')
+            .register('/sw.js', { scope: '/' })
             .then((registration) => {
               // Immediately check for updates on page load
-              registration.update();
+              registration.update().catch(() => {});
 
               // When a new version is detected, tell the worker to activate immediately
               registration.addEventListener('updatefound', () => {
@@ -50,7 +67,7 @@
               });
             })
             .catch((error) => {
-              console.warn('PWA Service Worker registration failed:', error);
+              console.warn('PWA Service Worker registration skipped:', error);
             });
 
           // Smoothly reload the page when the new Service Worker activates

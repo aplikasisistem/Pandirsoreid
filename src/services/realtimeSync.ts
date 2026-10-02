@@ -6,8 +6,7 @@ import {
   deleteDoc,
   writeBatch,
   getDocs,
-  query,
-  orderBy,
+  Unsubscribe,
 } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError } from './firebase';
 import { GameAccount, SaleRecord } from '../types';
@@ -27,11 +26,13 @@ class RealtimeSyncService {
   private listeners: Set<AccountsListener> = new Set();
   private salesListeners: Set<SalesListener> = new Set();
   private broadcastChannel: BroadcastChannel | null = null;
-  private unsubscribeFirestoreAccounts: (() => void) | null = null;
-  private unsubscribeFirestoreSales: (() => void) | null = null;
+  private unsubscribeFirestoreAccounts: Unsubscribe | null = null;
+  private unsubscribeFirestoreSales: Unsubscribe | null = null;
   private currentMode: SyncMode = 'firebase';
   private currentAccounts: GameAccount[] = [];
   private currentSales: SaleRecord[] = [];
+  private isSeedingAccounts = false;
+  private hasAttemptedMigration = false;
   public isConnected = false;
 
   constructor() {
@@ -40,25 +41,36 @@ class RealtimeSyncService {
     this.initFirestoreSync();
   }
 
+  /**
+   * BroadcastChannel allows same-device multi-tab synchronization
+   * when offline or during instant optimistic state updates.
+   */
   private initBroadcastChannel() {
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
       try {
         this.broadcastChannel = new BroadcastChannel('pandirstore_realtime_sync');
         this.broadcastChannel.onmessage = (event) => {
-          if (event.data?.type === 'ACCOUNTS_UPDATED' && Array.isArray(event.data.payload)) {
-            this.currentAccounts = event.data.payload;
-            this.notifyListeners(this.currentAccounts);
-          } else if (event.data?.type === 'SALES_UPDATED' && Array.isArray(event.data.payload)) {
-            this.currentSales = event.data.payload;
-            this.notifySalesListeners(this.currentSales);
+          // Only use BroadcastChannel fallback if Firestore is currently disconnected
+          if (!this.isConnected) {
+            if (event.data?.type === 'ACCOUNTS_UPDATED' && Array.isArray(event.data.payload)) {
+              this.currentAccounts = event.data.payload;
+              this.notifyListeners(this.currentAccounts);
+            } else if (event.data?.type === 'SALES_UPDATED' && Array.isArray(event.data.payload)) {
+              this.currentSales = event.data.payload;
+              this.notifySalesListeners(this.currentSales);
+            }
           }
         };
       } catch (err) {
-        console.warn('BroadcastChannel not available:', err);
+        console.warn('BroadcastChannel initialization skipped:', err);
       }
     }
   }
 
+  /**
+   * Load initial cached state from localStorage so the application
+   * renders immediately without a blank loading screen.
+   */
   private loadCachedData() {
     if (typeof window === 'undefined') return;
     try {
@@ -92,11 +104,11 @@ class RealtimeSyncService {
     }
   }
 
-  private saveToLocalStorage(accounts: GameAccount[], broadcast = true) {
+  private saveToLocalStorage(accounts: GameAccount[], broadcast = false) {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
-      if (broadcast && this.broadcastChannel) {
+      if (broadcast && this.broadcastChannel && !this.isConnected) {
         this.broadcastChannel.postMessage({
           type: 'ACCOUNTS_UPDATED',
           payload: accounts,
@@ -107,11 +119,11 @@ class RealtimeSyncService {
     }
   }
 
-  private saveSalesToLocalStorage(sales: SaleRecord[], broadcast = true) {
+  private saveSalesToLocalStorage(sales: SaleRecord[], broadcast = false) {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_SALES_KEY, JSON.stringify(sales));
-      if (broadcast && this.broadcastChannel) {
+      if (broadcast && this.broadcastChannel && !this.isConnected) {
         this.broadcastChannel.postMessage({
           type: 'SALES_UPDATED',
           payload: sales,
@@ -122,124 +134,149 @@ class RealtimeSyncService {
     }
   }
 
-  private async initFirestoreSync() {
+  /**
+   * Initialize bidirectional real-time Firestore listeners.
+   * Any change made on any device triggers onSnapshot within milliseconds.
+   */
+  private initFirestoreSync() {
     try {
       const accountsCol = collection(db, ACCOUNTS_COLLECTION);
       const salesCol = collection(db, SALES_COLLECTION);
 
-      // 1. Subscribe to real-time accounts collection with onSnapshot
+      // Clean up previous listeners if any
+      if (this.unsubscribeFirestoreAccounts) {
+        this.unsubscribeFirestoreAccounts();
+        this.unsubscribeFirestoreAccounts = null;
+      }
+      if (this.unsubscribeFirestoreSales) {
+        this.unsubscribeFirestoreSales();
+        this.unsubscribeFirestoreSales = null;
+      }
+
+      // 1. Real-Time Accounts Listener (akun_toko_game)
       this.unsubscribeFirestoreAccounts = onSnapshot(
         accountsCol,
         async (snapshot) => {
           this.isConnected = true;
+          this.currentMode = 'firebase';
+
           if (!snapshot.empty) {
             const remoteAccounts: GameAccount[] = [];
             snapshot.forEach((docSnap) => {
               const data = docSnap.data() as GameAccount;
-              remoteAccounts.push(data);
+              if (data && data.id) {
+                remoteAccounts.push(data);
+              }
             });
 
-            // Ensure newest accounts appear first (createdAt descending)
+            // Sort newest first based on createdAt
             remoteAccounts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
             this.currentAccounts = remoteAccounts;
-            this.saveToLocalStorage(remoteAccounts, true);
-            this.currentMode = 'firebase';
+            this.saveToLocalStorage(remoteAccounts, false);
             this.notifyListeners(remoteAccounts);
           } else {
-            // First time seeding to akun_toko_game collection
-            await this.seedInitialAccounts();
+            // Firestore collection is empty. Check once if migration is needed, without looping.
+            if (!this.hasAttemptedMigration && !this.isSeedingAccounts) {
+              this.hasAttemptedMigration = true;
+              await this.checkAndMigrateLegacyAccounts();
+            } else {
+              this.currentAccounts = [];
+              this.saveToLocalStorage([], false);
+              this.notifyListeners([]);
+            }
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, ACCOUNTS_COLLECTION);
+          console.warn('Firestore onSnapshot accounts listener fallback:', error.message);
           this.currentMode = 'broadcast';
           this.isConnected = false;
         }
       );
 
-      // 2. Subscribe to real-time sales collection with onSnapshot
+      // 2. Real-Time Sales Ledger Listener (catatan_penjualan)
       this.unsubscribeFirestoreSales = onSnapshot(
         salesCol,
-        async (snapshot) => {
+        (snapshot) => {
           if (!snapshot.empty) {
             const remoteSales: SaleRecord[] = [];
             snapshot.forEach((docSnap) => {
-              remoteSales.push(docSnap.data() as SaleRecord);
+              const data = docSnap.data() as SaleRecord;
+              if (data && data.id) {
+                remoteSales.push(data);
+              }
             });
 
-            // Order newest sales transactions first (date descending)
             remoteSales.sort((a, b) => (b.date || 0) - (a.date || 0));
-
             this.currentSales = remoteSales;
-            this.saveSalesToLocalStorage(remoteSales, true);
+            this.saveSalesToLocalStorage(remoteSales, false);
             this.notifySalesListeners(remoteSales);
-          } else if (this.currentSales.length > 0) {
-            await this.seedInitialSales();
+          } else {
+            this.currentSales = [];
+            this.saveSalesToLocalStorage([], false);
+            this.notifySalesListeners([]);
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, SALES_COLLECTION);
+          console.warn('Firestore onSnapshot sales listener fallback:', error.message);
         }
       );
-
-      this.currentMode = 'firebase';
     } catch (err) {
-      console.error('Failed to initialize Firestore sync:', err);
+      console.warn('Failed to attach Firestore listeners, running offline cache:', err);
       this.currentMode = 'broadcast';
       this.isConnected = false;
     }
   }
 
-  private async seedInitialAccounts() {
+  /**
+   * One-time check for legacy collections to prevent data loss.
+   */
+  private async checkAndMigrateLegacyAccounts() {
+    if (this.isSeedingAccounts) return;
+    this.isSeedingAccounts = true;
+
     try {
-      // Check if previous collection 'gamestore_accounts' has existing data to migrate
       let seedSource = INITIAL_ACCOUNTS;
       try {
-        const oldSnapshot = await getDocs(collection(db, 'gamestore_accounts'));
-        if (!oldSnapshot.empty) {
-          const oldList: GameAccount[] = [];
-          oldSnapshot.forEach((d) => oldList.push(d.data() as GameAccount));
-          if (oldList.length > 0) {
-            seedSource = oldList;
+        const legacySnap = await getDocs(collection(db, 'gamestore_accounts'));
+        if (!legacySnap.empty) {
+          const legacyAccounts: GameAccount[] = [];
+          legacySnap.forEach((d) => {
+            const item = d.data() as GameAccount;
+            if (item && item.id) legacyAccounts.push(item);
+          });
+          if (legacyAccounts.length > 0) {
+            seedSource = legacyAccounts;
           }
         }
       } catch {
-        // use INITIAL_ACCOUNTS
+        // Fallback to INITIAL_ACCOUNTS
       }
 
-      const batch = writeBatch(db);
-      for (const acc of seedSource) {
-        const docRef = doc(db, ACCOUNTS_COLLECTION, acc.id);
-        batch.set(docRef, acc);
+      if (seedSource.length > 0) {
+        const batch = writeBatch(db);
+        for (const acc of seedSource) {
+          const docRef = doc(db, ACCOUNTS_COLLECTION, acc.id);
+          batch.set(docRef, acc);
+        }
+        await batch.commit();
+      } else {
+        this.currentAccounts = [];
+        this.saveToLocalStorage([], false);
+        this.notifyListeners([]);
       }
-      await batch.commit();
-      this.currentAccounts = seedSource;
-      this.saveToLocalStorage(seedSource, true);
-      this.notifyListeners(seedSource);
     } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, ACCOUNTS_COLLECTION);
-    }
-  }
-
-  private async seedInitialSales() {
-    try {
-      const batch = writeBatch(db);
-      for (const sale of INITIAL_SALES_RECORDS) {
-        const docRef = doc(db, SALES_COLLECTION, sale.id);
-        batch.set(docRef, sale);
-      }
-      await batch.commit();
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, SALES_COLLECTION);
+      console.warn('Initial migration check completed with warning:', e);
+    } finally {
+      this.isSeedingAccounts = false;
     }
   }
 
   public getSyncStatus(): { mode: SyncMode; label: string; active: boolean } {
-    if (this.currentMode === 'firebase') {
+    if (this.currentMode === 'firebase' || this.isConnected) {
       return {
         mode: 'firebase',
-        label: 'Firebase Firestore Real-Time Active (Multi-Device Terhubung)',
+        label: 'Google Cloud Firestore Real-Time Active (Multi-Device Terhubung)',
         active: true,
       };
     }
@@ -252,6 +289,7 @@ class RealtimeSyncService {
 
   public subscribe(listener: AccountsListener): () => void {
     this.listeners.add(listener);
+    // Immediately supply current state to new subscriber
     listener([...this.currentAccounts]);
     return () => {
       this.listeners.delete(listener);
@@ -294,6 +332,10 @@ class RealtimeSyncService {
     return [...this.currentSales];
   }
 
+  /**
+   * Adds a new game account to Firestore.
+   * Immediately propagates to all devices in real-time.
+   */
   public async addAccount(newAccount: Omit<GameAccount, 'createdAt' | 'updatedAt'>): Promise<GameAccount> {
     const now = Date.now();
     const created: GameAccount = {
@@ -302,13 +344,13 @@ class RealtimeSyncService {
       updatedAt: now,
     };
 
-    // Optimistic local update: put at index 0 (newest first)
-    const updatedList = [created, ...this.currentAccounts];
+    // Optimistic local update (newest at top)
+    const updatedList = [created, ...this.currentAccounts.filter((a) => a.id !== created.id)];
     this.currentAccounts = updatedList;
-    this.saveToLocalStorage(updatedList, true);
+    this.saveToLocalStorage(updatedList, false);
     this.notifyListeners(updatedList);
 
-    // Sync to Firestore 'akun_toko_game'
+    // Save directly to Firestore collection 'akun_toko_game'
     try {
       await setDoc(doc(db, ACCOUNTS_COLLECTION, created.id), created);
     } catch (e) {
@@ -319,6 +361,10 @@ class RealtimeSyncService {
     return created;
   }
 
+  /**
+   * Updates an existing account in Firestore.
+   * Propagates to all buyer & seller devices in real-time.
+   */
   public async updateAccount(account: GameAccount): Promise<GameAccount> {
     const updated: GameAccount = {
       ...account,
@@ -328,10 +374,9 @@ class RealtimeSyncService {
     // Optimistic local update
     const updatedList = this.currentAccounts.map((a) => (a.id === updated.id ? updated : a));
     this.currentAccounts = updatedList;
-    this.saveToLocalStorage(updatedList, true);
+    this.saveToLocalStorage(updatedList, false);
     this.notifyListeners(updatedList);
 
-    // Sync to Firestore 'akun_toko_game'
     try {
       await setDoc(doc(db, ACCOUNTS_COLLECTION, updated.id), updated);
     } catch (e) {
@@ -342,6 +387,10 @@ class RealtimeSyncService {
     return updated;
   }
 
+  /**
+   * Updates stock or changes status between READY and SOLD_OUT.
+   * If transitioning to SOLD_OUT, creates a sales ledger record in Firestore.
+   */
   public async updateAccountStock(
     id: string,
     stock: number,
@@ -353,7 +402,7 @@ class RealtimeSyncService {
     if (status === 'SOLD_OUT' && target.status !== 'SOLD_OUT') {
       const cost = target.costPrice || Math.round(target.price * 0.7);
       await this.addSaleRecord({
-        accountId: target.id,
+        accountId: target.idLapak || target.accountId || target.id,
         accountTitle: target.title,
         game: target.game,
         sellingPrice: target.price,
@@ -374,14 +423,17 @@ class RealtimeSyncService {
     return this.updateAccount(updated);
   }
 
+  /**
+   * Deletes an account from Firestore.
+   * Immediately removes it from all active users' catalog in real-time.
+   */
   public async deleteAccount(id: string): Promise<boolean> {
     // Optimistic local update
     const updatedList = this.currentAccounts.filter((a) => a.id !== id);
     this.currentAccounts = updatedList;
-    this.saveToLocalStorage(updatedList, true);
+    this.saveToLocalStorage(updatedList, false);
     this.notifyListeners(updatedList);
 
-    // Sync to Firestore 'akun_toko_game'
     try {
       await deleteDoc(doc(db, ACCOUNTS_COLLECTION, id));
     } catch (e) {
@@ -392,14 +444,17 @@ class RealtimeSyncService {
     return true;
   }
 
+  /**
+   * Adds a transaction record to Firestore 'catatan_penjualan'.
+   */
   public async addSaleRecord(record: Omit<SaleRecord, 'id'>): Promise<SaleRecord> {
     const newRecord: SaleRecord = {
       ...record,
       id: `TRX-${Date.now().toString().slice(-6)}`,
     };
-    const updated = [newRecord, ...this.currentSales];
+    const updated = [newRecord, ...this.currentSales.filter((s) => s.id !== newRecord.id)];
     this.currentSales = updated;
-    this.saveSalesToLocalStorage(updated, true);
+    this.saveSalesToLocalStorage(updated, false);
     this.notifySalesListeners(updated);
 
     try {
@@ -409,11 +464,6 @@ class RealtimeSyncService {
     }
 
     return newRecord;
-  }
-
-  public async resetToSeed(): Promise<void> {
-    await this.seedInitialAccounts();
-    await this.seedInitialSales();
   }
 }
 
