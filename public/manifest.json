@@ -1,0 +1,39 @@
+{
+  "id": "/",
+  "name": "PANDIRSTORE.ID",
+  "short_name": "PANDIRSTORE",
+  "description": "Marketplace Jual Beli Akun Mobile Legends & Free Fire Aman, Cepat & Terpercaya Direct WhatsApp.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0a0c14",
+  "background_color": "#0a0c14",
+  "categories": ["games", "shopping", "entertainment"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pandirstore-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

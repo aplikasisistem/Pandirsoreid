@@ -1,0 +1,373 @@
+import { GameAccount, SaleRecord } from '../types';
+
+export const INITIAL_ACCOUNTS: GameAccount[] = [
+  {
+    id: 'ML-901',
+    game: 'MLBB',
+    title: 'Akun MLBB Mythic Glory 85★ Skin Collector Gusion & Legend Granger',
+    price: 650000,
+    costPrice: 450000, // Margin: Rp 200.000 (Hidden from Buyers!)
+    stock: 1,
+    status: 'READY',
+    isNego: true,
+    whatsappNumber: '085717046895',
+    rating: 4.9,
+    soldCount: 52,
+    thumbnail: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      {
+        category: 'Profil & Winrate',
+        url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+        label: 'Profil Akun & All Season WR 68%',
+      },
+      {
+        category: 'Skin Collector/Legend',
+        url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
+        label: 'Collector Gusion & Legend Granger Aktif',
+      },
+      {
+        category: 'Hero & Skin',
+        url: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80',
+        label: '118 Hero Lengkap & 185 Skin Permanen',
+      },
+      {
+        category: 'Emblem & Stat',
+        url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+        label: 'All Emblem Max Level 60 Siap Turnamen',
+      },
+    ],
+    mlSpecs: {
+      rank: 'Mythic Glory 85★',
+      totalHero: 118,
+      totalSkin: 185,
+      rareSkins: [
+        'Skin Collector Gusion - Night Owl',
+        'Skin Legend Granger - Starfall Knight',
+        'Skin KOF Chou - Iori Yagami',
+        'Skin Lightborn Alucard',
+      ],
+      emblem: 'Max All Emblem Level 60',
+      bindStatus: 'Moonton Sepaket Lengkap (Email Bersih / No Minus)',
+      winrate: '68.4% (All Seasons)',
+    },
+    notes: 'Akun tangan pertama, aman 100%. Data Moonton sepaket bisa diubah ke email pembeli. Anti hackback bergaransi seumur hidup.',
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 3,
+    updatedAt: Date.now() - 1000 * 60 * 30,
+  },
+  {
+    id: 'FF-402',
+    game: 'FREE_FIRE',
+    title: 'Akun FF Old Season 1 & 2 Sakuraset Bundle Criminal Merah Evo Gun Max',
+    price: 850000,
+    costPrice: 600000, // Margin: Rp 250.000
+    stock: 1,
+    status: 'READY',
+    isNego: true,
+    whatsappNumber: '085717046895',
+    rating: 5.0,
+    soldCount: 74,
+    thumbnail: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      {
+        category: 'Profil & Level',
+        url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80',
+        label: 'Profil Level 74 & KD 4.8 Master',
+      },
+      {
+        category: 'Vault/Bundle Utama',
+        url: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80',
+        label: 'Bundle Criminal Merah & Sakura S1 Old',
+      },
+      {
+        category: 'Collection Skin Senjata (Evo Gun)',
+        url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+        label: 'M1014 Apocalyptic Max & AK Blue Flame Draco Lv 7',
+      },
+      {
+        category: 'Badge/Vault',
+        url: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80',
+        label: 'Vault 420+ Item & Emote Rare Old Lengkap',
+      },
+    ],
+    ffSpecs: {
+      level: 74,
+      elitePass: 'Season 1 Sakura & Season 2 Hip Hop Old',
+      mainBundles: ['Bundle Top Criminal Merah', 'Set Sakura Old S1', 'Bundle Dino Hijau', 'Bandit Set'],
+      evoGuns: ['M1014 Dragon Lv Max', 'AK Draco Blue Flame Lv 7 Max', 'SCAR Megalodon Lv 6', 'MP40 Cobra Lv 5'],
+      bindStatus: 'FB Bersih No Minus / Unbind All Device',
+      vaultCount: 435,
+    },
+    notes: 'Akun langka koleksi pribadi. Elite pass season 1 sakura masih ada. Siap pamer di lobi. Log in via FB langsung lepas.',
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 5,
+    updatedAt: Date.now() - 1000 * 60 * 90,
+  },
+  {
+    id: 'ML-815',
+    game: 'MLBB',
+    title: 'Akun MLBB Mythical Immortal Skin Aspirants Layla & Fanny Prime',
+    price: 480000,
+    costPrice: 320000, // Margin: Rp 160.000
+    stock: 1,
+    status: 'READY',
+    isNego: true,
+    whatsappNumber: '085717046895',
+    rating: 4.8,
+    soldCount: 39,
+    thumbnail: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      {
+        category: 'Profil & Winrate',
+        url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80',
+        label: 'Rank Mythical Immortal 112 Bintang',
+      },
+      {
+        category: 'Skin Collector/Legend',
+        url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+        label: 'Aspirants Layla & Fanny Cyber Blade',
+      },
+      {
+        category: 'Hero & Skin',
+        url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+        label: 'Total Skin 142 Termasuk Epic Showcase',
+      },
+      {
+        category: 'Emblem & Stat',
+        url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+        label: 'Winrate Fanny 72% (Total 900+ Match)',
+      },
+    ],
+    mlSpecs: {
+      rank: 'Mythical Immortal 112★',
+      totalHero: 110,
+      totalSkin: 142,
+      rareSkins: [
+        'Skin The Aspirants Layla - Miss Hikari',
+        'Skin The Aspirants Fanny - Blade of Kibou',
+        'Skin M3 Roger Fiend Haunter',
+        'Skin Epic Limited Ling Night Shade',
+      ],
+      emblem: 'Max Assassin, Mage & Tank',
+      bindStatus: 'Moonton Sepaket Lengkap (Bisa Rebind)',
+      winrate: '71.2% All Season',
+    },
+    notes: 'Akun mekanik tinggi untuk user assassin dan marksman. Skin anime Aspirants komplit suara dubbing Jepang.',
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2,
+    updatedAt: Date.now() - 1000 * 60 * 15,
+  },
+  {
+    id: 'FF-210',
+    game: 'FREE_FIRE',
+    title: 'Akun FF Sultan Murah MP40 Predator Cobra Lv 7 & Bundle Arctic Blue',
+    price: 380000,
+    costPrice: 250000, // Margin: Rp 130.000
+    stock: 1,
+    status: 'READY',
+    isNego: true,
+    whatsappNumber: '085717046895',
+    rating: 4.9,
+    soldCount: 61,
+    thumbnail: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      {
+        category: 'Profil & Level',
+        url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+        label: 'Profil Level 69 Booyah Pass Aktif',
+      },
+      {
+        category: 'Collection Skin Senjata (Evo Gun)',
+        url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+        label: 'MP40 Cobra Level 7 Emote Ular Menyala',
+      },
+      {
+        category: 'Vault/Bundle Utama',
+        url: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80',
+        label: 'Bundle Arctic Blue & Celana Jazz Old',
+      },
+      {
+        category: 'Badge/Vault',
+        url: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80',
+        label: 'Vault 280+ Item & 35 Emote Joget Rare',
+      },
+    ],
+    ffSpecs: {
+      level: 69,
+      elitePass: 'S12, S15, S19 & Booyah Pass Max',
+      mainBundles: ['Bundle Arctic Blue', 'Celana Malaikat Pria', 'Bundle Steampunk', 'Topi Old'],
+      evoGuns: ['MP40 Predator Cobra Lv 7 (Emote On)', 'M1887 Rapper Underworld', 'M4A1 Genos'],
+      bindStatus: 'Google Only (Email Baru Khusus Pembeli)',
+      vaultCount: 285,
+    },
+    notes: 'Harga bersahabat, senjata MP40 Cobra sudah max level 7 tinggal gas main ranked. Garansi anti tabrak.',
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 6,
+    updatedAt: Date.now() - 1000 * 60 * 50,
+  },
+  {
+    id: 'ML-305',
+    game: 'MLBB',
+    title: 'Akun MLBB Smurf Mythic Harga Pelajar Skin KOF Chou & Venom Squad',
+    price: 180000,
+    costPrice: 110000, // Margin: Rp 70.000
+    stock: 1,
+    status: 'READY',
+    isNego: true,
+    whatsappNumber: '085717046895',
+    rating: 4.7,
+    soldCount: 88,
+    thumbnail: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      {
+        category: 'Profil & Winrate',
+        url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
+        label: 'Rank Mythic Bintang 22 WR Total 76%',
+      },
+      {
+        category: 'Skin Collector/Legend',
+        url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+        label: 'Skin KOF Chou Iori Yagami Emote Freestyle',
+      },
+      {
+        category: 'Hero & Skin',
+        url: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80',
+        label: '75 Hero & 82 Skin Termasuk Venom Squad',
+      },
+      {
+        category: 'Emblem & Stat',
+        url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+        label: 'Emblem Assassin & Fighter Max 60',
+      },
+    ],
+    mlSpecs: {
+      rank: 'Mythic 22★',
+      totalHero: 75,
+      totalSkin: 82,
+      rareSkins: ['Skin KOF Chou Iori Yagami', 'Skin Venom Squad Harley', 'Skin Special Sun', 'Skin Starlight Hayabusa'],
+      emblem: 'Emblem Assassin Lv 60, Fighter Lv 60',
+      bindStatus: 'Moonton Sepaket / Unbind All Sosial Media',
+      winrate: '76.8% (Akun Smurf Bersih)',
+    },
+    notes: 'Cocok buat yang mau akun smurf dengan winrate tinggi dan skin KOF Chou legendaris. Harga ramah kantong!',
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 1,
+    updatedAt: Date.now() - 1000 * 60 * 5,
+  },
+  {
+    id: 'FF-109',
+    game: 'FREE_FIRE',
+    title: 'Akun FF Terjual S5 Bundle Dino Hijau & SG Rapper (CONTOH SOLD OUT)',
+    price: 420000,
+    costPrice: 280000, // Margin: Rp 140.000
+    stock: 0,
+    status: 'SOLD_OUT',
+    isNego: false,
+    whatsappNumber: '085717046895',
+    rating: 5.0,
+    soldCount: 95,
+    thumbnail: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80',
+    gallery: [
+      {
+        category: 'Profil & Level',
+        url: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80',
+        label: 'Profil Level 68 Terjual Cepat',
+      },
+      {
+        category: 'Vault/Bundle Utama',
+        url: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80',
+        label: 'Bundle Dino Hijau & Emote Old',
+      },
+    ],
+    ffSpecs: {
+      level: 68,
+      elitePass: 'S5 Old',
+      mainBundles: ['Bundle Dino Hijau', 'Set Zombie Samurai'],
+      evoGuns: ['SG Rapper Underworld M1887'],
+      bindStatus: 'FB Terkait (Sold Out)',
+      vaultCount: 220,
+    },
+    notes: 'Akun ini telah berhasil terjual ke buyer via Rekber WhatsApp!',
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 7,
+    updatedAt: Date.now() - 1000 * 60 * 60 * 12,
+  },
+];
+
+// Rich sales historical records for Admin Profit & Loss Recapitulation
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const now = Date.now();
+
+export const INITIAL_SALES_RECORDS: SaleRecord[] = [
+  {
+    id: 'TRX-101',
+    accountId: 'ML-901',
+    accountTitle: 'Akun MLBB Mythic Glory Skin Collector',
+    game: 'MLBB',
+    sellingPrice: 650000,
+    costPrice: 450000,
+    profit: 200000,
+    date: now - ONE_DAY_MS * 0.2, // Today
+    buyerNote: 'Pembeli Direct WhatsApp - Transfer BCA',
+  },
+  {
+    id: 'TRX-102',
+    accountId: 'FF-210',
+    accountTitle: 'Akun FF Sultan MP40 Cobra Lv 7',
+    game: 'FREE_FIRE',
+    sellingPrice: 380000,
+    costPrice: 250000,
+    profit: 130000,
+    date: now - ONE_DAY_MS * 0.8, // Today
+    buyerNote: 'Buyer Rekber Itemku - QRIS',
+  },
+  {
+    id: 'TRX-103',
+    accountId: 'ML-815',
+    accountTitle: 'Akun MLBB Immortal Aspirants Layla',
+    game: 'MLBB',
+    sellingPrice: 480000,
+    costPrice: 320000,
+    profit: 160000,
+    date: now - ONE_DAY_MS * 2.5, // This week
+    buyerNote: 'Direct WA Rekber Admin',
+  },
+  {
+    id: 'TRX-104',
+    accountId: 'FF-402',
+    accountTitle: 'Akun FF Old Season 1 Sakuraset',
+    game: 'FREE_FIRE',
+    sellingPrice: 850000,
+    costPrice: 600000,
+    profit: 250000,
+    date: now - ONE_DAY_MS * 4, // This week
+    buyerNote: 'Buyer Langganan - DANA',
+  },
+  {
+    id: 'TRX-105',
+    accountId: 'ML-305',
+    accountTitle: 'Akun MLBB Smurf Mythic KOF Chou',
+    game: 'MLBB',
+    sellingPrice: 180000,
+    costPrice: 110000,
+    profit: 70000,
+    date: now - ONE_DAY_MS * 12, // This month
+    buyerNote: 'Direct Transfer Bank BRI',
+  },
+  {
+    id: 'TRX-106',
+    accountId: 'FF-109',
+    accountTitle: 'Akun FF S5 Dino Hijau SG Rapper',
+    game: 'FREE_FIRE',
+    sellingPrice: 420000,
+    costPrice: 280000,
+    profit: 140000,
+    date: now - ONE_DAY_MS * 22, // This month
+    buyerNote: 'Direct WA - GoPay',
+  },
+  {
+    id: 'TRX-107',
+    accountId: 'ML-702',
+    accountTitle: 'Akun MLBB Mythic 50★ Skin Epic Limited',
+    game: 'MLBB',
+    sellingPrice: 350000,
+    costPrice: 220000,
+    profit: 130000,
+    date: now - ONE_DAY_MS * 45, // Earlier this year
+    buyerNote: 'Direct WA - Transfer BCA',
+  },
+];

@@ -1,0 +1,87 @@
+<svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="shieldGrad" x1="150" y1="80" x2="350" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#2563EB"/>
+      <stop offset="50%" stopColor="#1E293B"/>
+      <stop offset="100%" stopColor="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="shieldBorder" x1="150" y1="80" x2="350" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#38BDF8"/>
+      <stop offset="50%" stopColor="#60A5FA"/>
+      <stop offset="100%" stopColor="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="orangeArrow" x1="170" y1="270" x2="330" y2="130" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#F97316"/>
+      <stop offset="100%" stopColor="#FBBF24"/>
+    </linearGradient>
+    <linearGradient id="swooshCyan" x1="120" y1="120" x2="380" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#38BDF8"/>
+      <stop offset="100%" stopColor="#0284C7"/>
+    </linearGradient>
+    <linearGradient id="swooshOrange" x1="380" y1="180" x2="120" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#FB923C"/>
+      <stop offset="100%" stopColor="#EA580C"/>
+    </linearGradient>
+    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glowOrange" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Circular Glow Backdrop -->
+  <circle cx="250" cy="220" r="170" fill="#0369A1" opacity="0.15" filter="url(#glowCyan)"/>
+
+  <!-- Outer Orbit Swooshes (Arrows) -->
+  <!-- Cyan Top-Right Swoosh -->
+  <path d="M 170 110 C 230 75 320 85 365 135 C 385 158 395 190 390 220" 
+        stroke="url(#swooshCyan)" stroke-width="8" stroke-linecap="round" fill="none" filter="url(#glowCyan)"/>
+  <polygon points="390,210 395,235 370,225" fill="#38BDF8"/>
+  <polygon points="175,115 155,105 165,130" fill="#38BDF8"/>
+
+  <!-- Orange Bottom-Left Swoosh -->
+  <path d="M 330 330 C 270 365 180 355 135 305 C 115 282 105 250 110 220" 
+        stroke="url(#swooshOrange)" stroke-width="8" stroke-linecap="round" fill="none" filter="url(#glowOrange)"/>
+  <polygon points="110,230 105,205 130,215" fill="#F97316"/>
+  <polygon points="325,325 345,335 335,310" fill="#F97316"/>
+
+  <!-- Shield Outer Metallic Rim -->
+  <polygon points="250,90 350,140 330,270 250,340 170,270 150,140" 
+           fill="#0F172A" stroke="url(#shieldBorder)" stroke-width="12" stroke-linejoin="round"/>
+
+  <!-- Shield Inner Bevel -->
+  <polygon points="250,115 328,155 312,255 250,315 188,255 172,155" 
+           fill="url(#shieldGrad)" stroke="#38BDF8" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- Glowing @ symbol in background of shield -->
+  <circle cx="250" cy="205" r="42" stroke="#38BDF8" stroke-width="6" fill="none" opacity="0.85" filter="url(#glowCyan)"/>
+  <path d="M 250 185 C 238 185 228 194 228 206 C 228 218 238 227 250 227 C 260 227 268 220 270 210 L 270 200" 
+        stroke="#38BDF8" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- Big Neon Orange Upward Arrow across shield -->
+  <path d="M 185 275 L 290 170" stroke="url(#orangeArrow)" stroke-width="16" stroke-linecap="round" filter="url(#glowOrange)"/>
+  <polygon points="275,150 325,140 315,190" fill="#FBBF24" filter="url(#glowOrange)"/>
+
+  <!-- Controller Icon at the bottom of shield -->
+  <g transform="translate(210, 240)">
+    <!-- Controller Body -->
+    <rect x="0" y="5" width="80" height="48" rx="20" fill="#F8FAFC" stroke="#0284C7" stroke-width="4"/>
+    <!-- Handles indent -->
+    <ellipse cx="40" cy="45" rx="14" ry="8" fill="#0F172A"/>
+    <!-- D-Pad Left -->
+    <path d="M 16 24 H 28 M 22 18 V 30" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>
+    <!-- Buttons Right -->
+    <circle cx="56" cy="20" r="2.5" fill="#EF4444"/>
+    <circle cx="64" cy="24" r="2.5" fill="#3B82F6"/>
+    <circle cx="56" cy="28" r="2.5" fill="#10B981"/>
+    <circle cx="48" cy="24" r="2.5" fill="#F59E0B"/>
+  </g>
+
+  <!-- Sparkles -->
+  <polygon points="140,160 144,170 154,174 144,178 140,188 136,178 126,174 136,170" fill="#38BDF8"/>
+  <polygon points="360,280 363,287 370,290 363,293 360,300 357,293 350,290 357,287" fill="#FBBF24"/>
+</svg>
